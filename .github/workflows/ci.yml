@@ -133,6 +133,11 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      # DELIBERATE BREAK (Task 2.1): Array.fromAsync exists in Node 22 but not
+      # in Node 20, so this step fails on the Node 20 leg only.
+      - name: Deliberate break (needs Node 22)
+        run: node -e "Array.fromAsync([1]).then(() => console.log('Array.fromAsync OK'))"
+
       # Two matrix jobs cannot upload artifacts with the same name.
       - name: Upload build output
         uses: actions/upload-artifact@v7
