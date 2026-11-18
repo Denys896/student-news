@@ -1,0 +1,15 @@
+# Build output (rebuilt inside the image)
+target/
+# Local uploads
+data/
+# IDE files
+.idea/
+.vscode/
+*.iml
+# Logs
+logs/
+*.log
+# Git metadata and local env files
+.git
+.env
+.env.*
