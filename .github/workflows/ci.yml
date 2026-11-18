@@ -46,10 +46,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up JDK 21
+      - name: Set up JDK 27
         uses: actions/setup-java@v6
         with:
-          java-version: '21'
+          java-version: '27'
           distribution: temurin
           cache: maven            # without this, Maven re-downloads the world every run
 
@@ -82,10 +82,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up JDK 21
+      - name: Set up JDK 27
         uses: actions/setup-java@v6
         with:
-          java-version: '21'
+          java-version: '27'
           distribution: temurin
           cache: maven
 
@@ -141,6 +141,36 @@ jobs:
           path: frontend/dist/
           retention-days: 7
 
+  # ---------------------------------------------------------------- stage 1
+  # The Homework 12 starter. Only its tests run here: its Dockerfile is empty
+  # on purpose (writing it is the homework), so it stays out of the package
+  # matrix below.
+  avatar-service-test:
+    name: Avatar service · tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 27
+        uses: actions/setup-java@v6
+        with:
+          java-version: '27'
+          distribution: temurin
+          cache: maven
+
+      - name: Run tests
+        working-directory: avatar-service
+        run: mvn -B test
+
+      - name: Publish test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: avatar-service-surefire-reports
+          path: avatar-service/target/surefire-reports/
+          retention-days: 7
+
   # ---------------------------------------------------------------- stage 3
   # Packaging only runs once every earlier job is green. There is no point
   # spending minutes building images for code whose tests already failed.
@@ -163,7 +193,7 @@ jobs:
       # without needing registry credentials. Pushing is the Deploy stage, and that
       # is what the Final Project adds.
       - name: Build ${{ matrix.service }} image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.service }}
           push: false
@@ -177,7 +207,7 @@ jobs:
   ci-status:
     name: CI status
     if: always()
-    needs: [frontend-lint, backend-test, integration-test, frontend-build, package]
+    needs: [frontend-lint, backend-test, integration-test, frontend-build, avatar-service-test, package]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any stage failed
